@@ -1,13 +1,15 @@
 // Client-side mock functions to allow SPA deployment without Node.js errors
+// Note: useServerFn wraps arguments in { data: ... }, so we destructure them here.
+
 export const getProducts = async () => {
   return [
     {
       id: 1,
-      name: "Conjunto Algodón Orgánico", // Changed from nombre
-      description: "Suave conjunto de dos piezas para recién nacido en algodón 100% orgánico.", // Changed from descripcion
-      price: 15000, // Changed from precio
+      name: "Conjunto Algodón Orgánico",
+      description: "Suave conjunto de dos piezas para recién nacido en algodón 100% orgánico.",
+      price: 15000,
       slug: "conjunto-algodon",
-      category: { name: "Recién Nacido" }, // Changed from string to object
+      category: { name: "Recién Nacido" },
       images: [
         { url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800" }
       ],
@@ -51,7 +53,7 @@ export const getProducts = async () => {
   ]
 }
 
-export const getProductBySlug = async (slug: string) => {
+export const getProductBySlug = async ({ data: slug }: { data: string }) => {
   const products = await getProducts()
   return products.find(p => p.slug === slug)
 }
@@ -63,15 +65,26 @@ export const getCategories = async () => [
   { id: 4, name: "Accesorios" }
 ]
 
-export const loginAdmin = async () => ({ success: true })
-export const getAdminStats = async () => ({ totalOrders: 12, totalRevenue: 150000, totalProducts: 3 })
+export const loginAdmin = async ({ data: credentials }: any) => ({ success: true })
+
+export const getAdminStats = async () => ({
+  totalOrders: 12,
+  totalSales: 150000,
+  totalProducts: 3,
+  totalClients: 5,
+  recentActivity: [
+    { id: 1, user: "Juan Pérez", amount: 15000, date: new Date().toISOString() },
+    { id: 2, user: "María García", amount: 8500, date: new Date().toISOString() }
+  ]
+})
+
 export const getProductsWithStock = async () => getProducts()
 export const getOrders = async () => []
 export const getClients = async () => []
-export const createCheckoutSession = async () => ({ url: '#' })
-export const createOrder = async () => ({ success: true })
-export const updateOrderStatus = async () => {}
-export const deleteProduct = async () => {}
-export const createProduct = async () => {}
-export const updateProduct = async () => {}
+export const createCheckoutSession = async ({ data: cart }: any) => ({ url: '#' })
+export const createOrder = async ({ data: order }: any) => ({ success: true })
+export const updateOrderStatus = async ({ data: { id, status } }: any) => {}
+export const deleteProduct = async ({ data: id }: any) => {}
+export const createProduct = async ({ data: product }: any) => {}
+export const updateProduct = async ({ data: { id, product } }: any) => {}
 export const uploadImage = async () => "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800"
