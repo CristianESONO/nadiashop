@@ -38,6 +38,7 @@ interface SettingsContextType {
   updateSettings: (s: Partial<StoreSettings>) => void
   formatPrice: (amount: number) => string
   t: (key: string) => string
+  convertAmount: (amount: number, from?: string, to?: string) => number
 }
 
 const SettingsContext = createContext<SettingsContextType>({
@@ -45,6 +46,7 @@ const SettingsContext = createContext<SettingsContextType>({
   updateSettings: () => {},
   formatPrice: (n) => n.toString(),
   t: (k) => k,
+  convertAmount: (amount: number) => amount,
 })
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -76,12 +78,36 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       locale = settings.language === 'es' ? 'es-US' : settings.language === 'fr' ? 'fr-FR' : 'en-US'
     }
 
+    // Convert amount from assumed base (XAF) into selected currency
+    const converted = convertAmount(amount, 'XAF', settings.currency)
+
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: settings.currency,
       minimumFractionDigits: settings.currency === 'XAF' ? 0 : 2,
       maximumFractionDigits: settings.currency === 'XAF' ? 0 : 2,
-    }).format(amount)
+    }).format(converted)
+  }
+
+  // Simple fixed exchange rates relative to XAF as base (these are example rates)
+  const EXCHANGE_RATES: Record<string, number> = {
+    // 1 XAF in XAF
+    XAF: 1,
+    // 1 XAF to EUR (example)
+    EUR: 0.0015,
+    // 1 XAF to USD (example)
+    USD: 0.0016,
+  }
+
+  const convertAmount = (amount: number, from: string = 'XAF', to: string = settings.currency) => {
+    if (from === to) return amount
+    // Convert 'amount' which is assumed to be in 'from' currency to 'to' currency
+    // We'll normalize via XAF as pivot: amount_in_xaf = amount / rate[from]
+    const rateFrom = EXCHANGE_RATES[from] ?? 1
+    const rateTo = EXCHANGE_RATES[to] ?? 1
+    const amountInXaf = amount / rateFrom
+    const converted = amountInXaf * rateTo
+    return converted
   }
 
   // Minimal translation helper. Adds a lightweight i18n surface that can be expanded.
@@ -92,6 +118,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       configuration: 'Configuración',
       notifications: 'Notificaciones',
       contact_email_label: 'Email de contacto',
+      currency_label: 'Moneda',
     },
     fr: {
       save: 'Enregistrer',
@@ -99,6 +126,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       configuration: 'Configuration',
       notifications: 'Notifications',
       contact_email_label: "E-mail de contact",
+      currency_label: 'Devise',
     },
     en: {
       save: 'Save changes',
@@ -106,13 +134,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       configuration: 'Settings',
       notifications: 'Notifications',
       contact_email_label: 'Contact email',
+      currency_label: 'Currency',
     },
   }
 
   const t = (key: string) => translations[settings.language]?.[key] ?? translations['en'][key] ?? key
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, formatPrice, t }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, formatPrice, t, convertAmount }}>
       {children}
     </SettingsContext.Provider>
   )
