@@ -2,13 +2,13 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ShieldCheck, Truck, CheckCircle, ShoppingBag } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
+import { useSettings } from '../context/SettingsContext'
 
 export const Route = createFileRoute('/checkout')({
   component: Checkout,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
+// currency formatting is provided by SettingsContext
 
 const FREE_SHIPPING_THRESHOLD = 9500
 
@@ -17,6 +17,7 @@ import { createOrder, createCheckoutSession } from '../db/functions'
 
 function Checkout() {
   const { items, totalPrice, clearCart } = useCart()
+  const { formatPrice } = useSettings()
   const navigate = useNavigate()
   const createOrderFn = useServerFn(createOrder)
   const createSessionFn = useServerFn(createCheckoutSession)
@@ -26,7 +27,7 @@ function Checkout() {
   const isSuccess = searchParams.get('success') === 'true'
   const isCanceled = searchParams.get('canceled') === 'true'
 
-  const [confirmed, setConfirmed] = useState(isSuccess)
+  const confirmed = isSuccess
   const [orderNumber, setOrderNumber] = useState('')
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', address: '', city: '', postal: '' })
@@ -206,20 +207,20 @@ function Checkout() {
                     <p className="text-sm font-bold truncate">{item.name}</p>
                     <p className="text-xs text-[var(--text-soft)]">Talla {item.size} × {item.qty}</p>
                   </div>
-                  <p className="font-medium text-sm whitespace-nowrap">{formatXAF(item.price * item.qty)}</p>
+                  <p className="font-medium text-sm whitespace-nowrap">{formatPrice(item.price * item.qty)}</p>
                 </div>
               ))}
             </div>
             <div className="border-t pt-4 space-y-2 text-sm">
               <div className="flex justify-between text-[var(--text-soft)]">
-                <span>Subtotal</span><span>{formatXAF(totalPrice)}</span>
+                <span>Subtotal</span><span>{formatPrice(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-green-600 font-medium">
                 <span className="flex items-center gap-1"><Truck size={14} /> Envío</span>
-                <span>{shipping === 0 ? 'Gratis' : formatXAF(shipping)}</span>
+                <span>{shipping === 0 ? 'Gratis' : formatPrice(shipping)}</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t text-[var(--text-main)] text-base">
-                <span>Total</span><span>{formatXAF(grandTotal)}</span>
+                <span>Total</span><span>{formatPrice(grandTotal)}</span>
               </div>
             </div>
             <button

@@ -2,19 +2,19 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { getAdminStats } from '../db/functions'
 import { useState, useEffect } from 'react'
+import { useSettings } from '../context/SettingsContext'
 import { TrendingUp, ShoppingCart, Package, Users } from 'lucide-react'
 
 export const Route = createFileRoute('/admin/')({
   component: AdminIndex,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 function AdminIndex() {
   const fetchStats = useServerFn(getAdminStats)
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { formatPrice } = useSettings()
 
   useEffect(() => {
     fetchStats().then(res => {
@@ -24,7 +24,7 @@ function AdminIndex() {
   }, [])
 
   const stats = [
-    { name: 'Ventas Totales', value: formatXAF(data?.totalSales || 0), icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
+    { name: 'Ventas Totales', value: formatPrice(data?.totalSales || 0), icon: TrendingUp, color: 'text-green-600', bg: 'bg-green-50' },
     { name: 'Pedidos Totales', value: (data?.totalOrders || 0).toString(), icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
     { name: 'Productos', value: (data?.totalProducts || 0).toString(), icon: Package, color: 'text-amber-600', bg: 'bg-amber-50' },
     { name: 'Clientes', value: (data?.totalClients || 0).toString(), icon: Users, color: 'text-purple-600', bg: 'bg-purple-50' },
@@ -75,7 +75,7 @@ function AdminIndex() {
                   <div className="flex-1">
                     <p className="text-sm font-bold text-[var(--text-main)]">Nuevo pedido de {activity.user}</p>
                     <p className="text-xs text-[var(--text-soft)]">
-                      {new Date(activity.date).toLocaleDateString()} • {formatXAF(activity.amount)}
+                      {new Date(activity.date).toLocaleDateString()} • {formatPrice(activity.amount)}
                     </p>
                   </div>
                   <Link 

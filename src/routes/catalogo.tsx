@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SlidersHorizontal } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useSettings } from '../context/SettingsContext'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { getProducts } from '../db/functions'
@@ -19,8 +20,6 @@ export const Route = createFileRoute('/catalogo')({
 const CATEGORIES = ['Todo', 'Novedades', 'Recién Nacido', 'Bebé Niña', 'Bebé Niño', 'Accesorios']
 const SIZES = ['0-3M', '3-6M', '6-12M', '12-18M', '18-24M', '24-36M']
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 function Catalogo() {
   const search = Route.useSearch()
@@ -53,7 +52,7 @@ function Catalogo() {
 
   useEffect(() => {
     setLoading(true)
-    fetchProducts({ data: undefined }).then((data) => {
+    fetchProducts().then((data) => {
       setProducts(data || [])
       setLoading(false)
     }).catch(() => setLoading(false))
@@ -197,7 +196,7 @@ function Catalogo() {
                     </div>
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-[var(--text-main)]">{product.name}</h4>
-                      <p className="mt-1 text-sm text-[var(--text-soft)] tracking-tight">{formatXAF(product.price)}</p>
+                      <p className="mt-1 text-sm text-[var(--text-soft)] tracking-tight">{useSettings().formatPrice(product.price)}</p>
                     </div>
                   </Link>
                 )

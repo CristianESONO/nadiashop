@@ -3,13 +3,12 @@ import { Edit, Plus, Trash2, Search, X, Save, Upload } from 'lucide-react'
 import { useServerFn } from '@tanstack/react-start'
 import { getProducts, deleteProduct, createProduct, updateProduct, uploadImage, getCategories } from '../db/functions'
 import { useEffect, useState } from 'react'
+import { useSettings } from '../context/SettingsContext'
 
 export const Route = createFileRoute('/admin/productos')({
   component: AdminProducts,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 const EMPTY_FORM = { 
   name: '', 
@@ -41,8 +40,8 @@ function AdminProducts() {
   const reload = () => {
     setLoading(true)
     Promise.all([
-      fetchProducts({ data: undefined }),
-      fetchCategories({ data: undefined })
+      fetchProducts(),
+      fetchCategories()
     ]).then(([pData, cData]) => {
       setProducts(pData || [])
       setCategories(cData || [])
@@ -78,9 +77,10 @@ function AdminProducts() {
       setForm(f => ({ ...f, imageUrl: base64 }))
       
       try {
-        const res = await uploadFn({ data: base64 })
-        // Replace with final server URL
-        setForm(f => ({ ...f, imageUrl: res.url }))
+        const res = await uploadFn()
+        // uploadFn returns a string URL in this mock environment
+        const url = typeof res === 'string' ? res : (res as any).url
+        setForm(f => ({ ...f, imageUrl: url }))
       } catch (err) {
         alert('Error al subir imagen')
       }
@@ -186,7 +186,7 @@ function AdminProducts() {
                       </div>
                     </td>
                     <td className="px-8 py-5 text-gray-600">{p.category?.name || 'Sin categoría'}</td>
-                    <td className="px-8 py-5 font-medium">{formatXAF(p.price)}</td>
+                    <td className="px-8 py-5 font-medium">{useSettings().formatPrice(p.price)}</td>
                     <td className="px-8 py-5 text-right">
                       <div className="flex justify-end gap-2">
                         <button onClick={() => openEdit(p)} className="p-2 text-gray-400 hover:text-[var(--accent)] transition-colors cursor-pointer" title="Editar">

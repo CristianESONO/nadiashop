@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ShoppingBag, ArrowLeft, Star, Shield, Truck, Heart, ZoomIn, Check, ShoppingCart } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useSettings } from '../context/SettingsContext'
 import { useCart } from '../context/CartContext'
 import { useServerFn } from '@tanstack/react-start'
 import { getProductBySlug } from '../db/functions'
@@ -28,8 +29,6 @@ function ProductDetail() {
     }).catch(() => setLoading(false))
   }, [slug])
 
-  const formatXAF = (amount: number) =>
-    new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
   const handleAddToCart = () => {
     if (!product) return
@@ -111,7 +110,7 @@ function ProductDetail() {
               {[1,2,3,4,5].map(i => <Star key={i} size={16} className="fill-amber-400 text-amber-400" />)}
               <span className="text-sm text-[var(--text-soft)] ml-1">(24 reseñas)</span>
             </div>
-            <p className="text-3xl font-bold text-[var(--text-main)]">{formatXAF(product.price)}</p>
+            <p className="text-3xl font-bold text-[var(--text-main)]">{useSettings().formatPrice(product.price)}</p>
           </div>
 
           {sizes.length > 0 && (

@@ -1,13 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ShoppingBag, Trash2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useSettings } from '../context/SettingsContext'
 
 export const Route = createFileRoute('/carrito')({
   component: Carrito,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 const FREE_SHIPPING_THRESHOLD = 9500
 
@@ -44,7 +43,7 @@ function Carrito() {
                 <div className="flex-1 space-y-1">
                   <p className="font-bold text-sm text-[var(--text-main)]">{item.name}</p>
                   <p className="text-xs text-[var(--text-soft)]">Talla: {item.size}</p>
-                  <p className="font-medium text-sm">{formatXAF(item.price)}</p>
+                  <p className="font-medium text-sm">{useSettings().formatPrice(item.price)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 border border-[var(--line)] rounded-full px-3 py-1">
@@ -66,17 +65,17 @@ function Carrito() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-[var(--text-soft)]">
                 <span>Subtotal</span>
-                <span>{formatXAF(totalPrice)}</span>
+                <span>{useSettings().formatPrice(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-[var(--text-soft)]">
                 <span>Envío</span>
                 <span className={shipping === 0 ? 'text-green-600 font-medium' : ''}>
-                  {shipping === 0 ? 'Gratis' : formatXAF(shipping)}
+                  {shipping === 0 ? 'Gratis' : useSettings().formatPrice(shipping)}
                 </span>
               </div>
               <div className="border-t pt-3 flex justify-between font-bold text-[var(--text-main)]">
                 <span>Total</span>
-                <span>{formatXAF(grandTotal)}</span>
+                <span>{useSettings().formatPrice(grandTotal)}</span>
               </div>
             </div>
             <Link

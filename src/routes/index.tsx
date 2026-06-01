@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowRight, Star, ShieldCheck, Truck, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useSettings } from '../context/SettingsContext'
 import { useServerFn } from '@tanstack/react-start'
 import { getProducts } from '../db/functions'
 
@@ -8,15 +9,13 @@ export const Route = createFileRoute('/')(({
   component: Home,
 }))
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 function Home() {
   const fetchProducts = useServerFn(getProducts)
   const [featured, setFeatured] = useState<any[]>([])
 
   useEffect(() => {
-    fetchProducts({ data: undefined }).then((data) => {
+  fetchProducts().then((data) => {
       // Show first 3 products as featured
       setFeatured(data?.slice(0, 3) || [])
     })
@@ -84,7 +83,7 @@ function Home() {
                   </div>
                   <div className="mt-6 space-y-1">
                     <h3 className="text-sm font-bold uppercase tracking-tight">{item.name}</h3>
-                    <p className="text-sm text-[var(--text-soft)]">{formatXAF(item.price)}</p>
+                    <p className="text-sm text-[var(--text-soft)]">{useSettings().formatPrice(item.price)}</p>
                   </div>
                 </Link>
               )

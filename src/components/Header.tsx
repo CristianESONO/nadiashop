@@ -1,8 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { ShoppingBag, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import { useSettings } from '../context/SettingsContext'
 
 export default function Header() {
+  const { settings } = useSettings()
+
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--line)] bg-[var(--surface)] px-4 backdrop-blur-lg">
       <nav className="page-wrap flex items-center justify-between py-3 sm:py-5">
@@ -11,7 +14,7 @@ export default function Header() {
             to="/"
             className="text-xl font-serif font-bold tracking-tight text-[var(--text-main)] no-underline"
           >
-            Nadia's Shop
+            {settings.storeName}
           </Link>
 
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">

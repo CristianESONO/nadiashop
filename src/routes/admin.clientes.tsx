@@ -2,14 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { getClients } from '../db/functions'
 import { useState, useEffect } from 'react'
-import { Users, Mail, Phone, MapPin, Search } from 'lucide-react'
+import { Users, Search } from 'lucide-react'
 
 export const Route = createFileRoute('/admin/clientes')({
   component: AdminClientes,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
+// currency formatting provided by SettingsContext when needed
 
 function AdminClientes() {
   const fetchClients = useServerFn(getClients)
@@ -18,7 +17,7 @@ function AdminClientes() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    fetchClients({ data: undefined }).then(data => {
+    fetchClients().then(data => {
       setClients(data || [])
       setLoading(false)
     })

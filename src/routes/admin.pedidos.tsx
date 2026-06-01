@@ -2,14 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import { getOrders, updateOrderStatus } from '../db/functions'
 import { useState, useEffect } from 'react'
-import { Eye, Package, Check, Truck, XCircle, Clock } from 'lucide-react'
+import { useSettings } from '../context/SettingsContext'
+import { Package, Check, Truck, XCircle, Clock } from 'lucide-react'
 
 export const Route = createFileRoute('/admin/pedidos')({
   component: AdminOrders,
 })
 
-const formatXAF = (amount: number) =>
-  new Intl.NumberFormat('fr-CM', { style: 'currency', currency: 'XAF', minimumFractionDigits: 0 }).format(amount)
 
 function AdminOrders() {
   const fetchOrders = useServerFn(getOrders)
@@ -48,6 +47,8 @@ function AdminOrders() {
     }
   }
 
+  const { formatPrice } = useSettings()
+
   return (
     <div className="rise-in">
       <div className="flex justify-between items-center mb-10">
@@ -82,7 +83,7 @@ function AdminOrders() {
                     #{order.id.slice(0, 8).toUpperCase()}
                   </td>
                   <td className="px-6 py-5 text-sm font-bold text-[var(--text-main)]">{order.user?.fullName || 'Invitado'}</td>
-                  <td className="px-6 py-5 text-sm font-bold text-[var(--text-main)]">{formatXAF(Number(order.totalAmount))}</td>
+                  <td className="px-6 py-5 text-sm font-bold text-[var(--text-main)]">{formatPrice(Number(order.totalAmount))}</td>
                   <td className="px-6 py-5">
                     {getStatusBadge(order.status)}
                   </td>
